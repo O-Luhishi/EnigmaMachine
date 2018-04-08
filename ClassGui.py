@@ -5,12 +5,13 @@ import EnigmaLogic
 
 class MainInterface:
     def __init__(self, parent):
-        global select_rotor_1
         self.parent = parent
         parent.title("Enigma Machine Emulator")
         self.initialiseWindow()
 
     def initialiseWindow(self):
+        settings = ConfigurationWindow()
+        enc = Encryption()
         global plaintext_entry
         # make an Entry to take plaintext input, label it
         plaintext_entry_label = ttk.Labelframe(root1, text="Enter Plaintext To Encrypt/Decrypt:", padding="10 10 10 10")
@@ -25,11 +26,11 @@ class MainInterface:
         ciphertext_entry.insert(END, ciphertext)
 
         #Encryption And Decryption Buttons
-        btn_Encrypt = ttk.Button(root1, text="Encrypt Message", command=self.encrypt)
-        btn_Decrypt = ttk.Button(root1, text="Decrypt Cipher", command=self.settingsWindow)
+        btn_Encrypt = ttk.Button(root1, text="Encrypt Message", command=enc.encrypt)
+        btn_Decrypt = ttk.Button(root1, text="Decrypt Cipher", command=settings.settingsWindow)
 
         # Configuration Button To Open settings
-        btn_Configuration = ttk.Button(root1, text="Configure Machine", command=self.settingsWindow)
+        btn_Configuration = ttk.Button(root1, text="Configure Machine", command=settings.settingsWindow)
 
         # Exit Button To Close Program Safely
         btn_Exit = ttk.Button(root1, text='Exit', command=root1.quit)
@@ -48,8 +49,9 @@ class MainInterface:
         btn_Configuration.grid(sticky="w", column=0, row=3, padx=10, pady=10)
         btn_Exit.grid(sticky="e",column=0, row=3, padx=10, pady=10)
 
-
+class ConfigurationWindow:
     def settingsWindow(self):
+        global select_rotor_1, select_rotor_2, select_rotor_3
         self.window = Toplevel(root1)
         self.window.title("Settings")
 
@@ -65,7 +67,6 @@ class MainInterface:
 
         select_rotor_3 = ttk.Combobox(pick, values=available_rotors, state='readonly', width=5)
         select_rotor_3.current(8)
-
 
         # dropdown to select which reflector to use
         available_reflectors = ["B", "C"]
@@ -108,7 +109,25 @@ class MainInterface:
         plugboard_entry_label.grid(in_=settings_frame, row=3, padx=5, pady=5)
         plugboard_entry.grid(in_=plugboard_entry_label, padx=5, pady=5)
 
+        btn_Save = ttk.Button(self.window, text="Save Settings", command= lambda: self.saveWindow(select_rotor_1.current(), select_rotor_2.current(), select_rotor_3.current()))
+        btn_Save.grid(column=1, row=3, padx=5, pady=5)
+
+    def saveWindow(self, rotor, rotor2, rotor3):
+        global rotor1
+        rotor1 = rotor
+        self.rotor2 = rotor2
+        self.rotor3 = rotor3
+        print("Test", rotor1)
+        self.window.destroy()
+
+    def getRotor1(self):
+        return rotor1
+
+class Encryption:
+    def __init__(self):
+        pass
     def encrypt(self):
+        settingsPage = ConfigurationWindow()
         plugboard = BuildPlugboard()
         # tidy entry of plaintext
         plain = plaintext_entry.get(1.0, END).strip()
@@ -124,7 +143,7 @@ class MainInterface:
 
         # put the right scramblers and reflector in the machine
         scram_list = [
-            EnigmaLogic.possible_scramblers[select_rotor_1.current()],
+            EnigmaLogic.possible_scramblers[settingsPage.getRotor1()],
             EnigmaLogic.possible_scramblers[select_rotor_2.current()],
             EnigmaLogic.possible_scramblers[select_rotor_3.current()]
         ]
@@ -152,11 +171,6 @@ class MainInterface:
         # do the encryption
         cipher = current_machine.encrypt(plain)
         ciphertext_entry.replace(1.0, END, cipher)
-
-
-class Encryption:
-    def __init__(self):
-        pass
 
 class BuildPlugboard:
     def __init__(self):
