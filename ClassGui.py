@@ -12,7 +12,7 @@ class MainInterface:
     def initialiseWindow(self):
         settings = ConfigurationWindow()
         enc = Encryption()
-        global plaintext_entry
+        global plaintext_entry, ciphertext_entry
         # make an Entry to take plaintext input, label it
         plaintext_entry_label = ttk.Labelframe(root1, text="Enter Plaintext To Encrypt/Decrypt:", padding="10 10 10 10")
         plaintext_entry = Text(plaintext_entry_label, height=4, width=50)
@@ -109,19 +109,37 @@ class ConfigurationWindow:
         plugboard_entry_label.grid(in_=settings_frame, row=3, padx=5, pady=5)
         plugboard_entry.grid(in_=plugboard_entry_label, padx=5, pady=5)
 
-        btn_Save = ttk.Button(self.window, text="Save Settings", command= lambda: self.saveWindow(select_rotor_1.current(), select_rotor_2.current(), select_rotor_3.current()))
+        btn_Save = ttk.Button(self.window, text="Save Settings", command= lambda: self.saveWindow(select_rotor_1.current(), select_rotor_2.current(), select_rotor_3.current(), select_reflector.current(), plugboard_entry.get(), set1.get(), set2.get(), set3.get()))
         btn_Save.grid(column=1, row=3, padx=5, pady=5)
 
-    def saveWindow(self, rotor, rotor2, rotor3):
-        global rotor1
+    def saveWindow(self, rotor, rotors2, rotors3, reflectors, entryPlug, sets1, sets2, sets3):
+        global rotor1, rotor2, rotor3, reflector, plugboard, set1, set2, set3
         rotor1 = rotor
-        self.rotor2 = rotor2
-        self.rotor3 = rotor3
-        print("Test", rotor1)
+        rotor2 = rotors2
+        rotor3 = rotors3
+        reflector = reflectors
+        plugboard = entryPlug
+        set1 = sets1
+        set2 = sets2
+        set3 = sets3
         self.window.destroy()
 
     def getRotor1(self):
         return rotor1
+    def getRotor2(self):
+        return rotor2
+    def getRotor3(self):
+        return rotor3
+    def getReflector(self):
+        return reflector
+    def getPlugBoard(self):
+        return plugboard
+    def getSet1(self):
+        return set1
+    def getSet2(self):
+        return set2
+    def getSet3(self):
+        return set3
 
 class Encryption:
     def __init__(self):
@@ -144,18 +162,18 @@ class Encryption:
         # put the right scramblers and reflector in the machine
         scram_list = [
             EnigmaLogic.possible_scramblers[settingsPage.getRotor1()],
-            EnigmaLogic.possible_scramblers[select_rotor_2.current()],
-            EnigmaLogic.possible_scramblers[select_rotor_3.current()]
+            EnigmaLogic.possible_scramblers[settingsPage.getRotor2()],
+            EnigmaLogic.possible_scramblers[settingsPage.getRotor3()]
         ]
-        refl = EnigmaLogic.possible_reflectors[select_reflector.current()]
+        refl = EnigmaLogic.possible_reflectors[settingsPage.getReflector()]
 
         # make a Plugboard from the entry
-        plug = plugboard.build_plugboard(plugboard_entry.get())
+        plug = plugboard.build_plugboard(settingsPage.getPlugBoard())
         if not plug.check_mapping():
             tkinter.messagebox.showerror("oh no!", "This is not a valid plugboard:\n not mapped in pairs")
 
         # set the starting orientations of the rotors
-        orient_list = [set1.get(), set2.get(), set3.get()]
+        orient_list = [settingsPage.getSet1(), settingsPage.getSet2(), settingsPage.getSet3()]
         for i in orient_list:
             if len(i) > 1 or not (i.isalpha() or i == ""):
                 tkinter.messagebox.showerror("oh no!", "Invalid setting for starting position:\n "

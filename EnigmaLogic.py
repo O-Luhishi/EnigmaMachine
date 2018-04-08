@@ -178,11 +178,8 @@ svii = Scrambler([13, 24, 7, 4, 2, 12, 22, 16, 4, 15, 8, 11, 15, 1, 6, 16, 10, 1
 sviii = Scrambler([5, 9, 14, 4, 15, 6, 17, 7, 20, 18, 25, 7, 3, 16, 11, 2, 10, 21, 12, 3, 19, 13, 24, 1, 8, 22],
                   [0, 14])
 
-ra = Reflector([4, 8, 10, 22, 22, 6, 18, 16, 13, 18, 12, 20, 16, 4, 2, 5, 24, 22, 1, 25, 21, 13, 14, 10, 8, 4])
 rb = Reflector([24, 16, 18, 4, 12, 13, 5, 22, 7, 14, 3, 21, 2, 23, 24, 19, 14, 10, 13, 6, 8, 1, 25, 12, 2, 20])
 rc = Reflector([5, 20, 13, 6, 4, 21, 8, 17, 22, 20, 7, 14, 11, 9, 18, 13, 3, 19, 2, 23, 24, 6, 17, 15, 9, 12])
-rbt = Reflector([4, 12, 8, 13, 22, 15, 18, 15, 1, 25, 18, 3, 3, 14, 23, 23, 13, 6, 7, 2, 11, 24, 11, 20, 8, 19])
-rct = Reflector([17, 2, 12, 24, 5, 8, 13, 3, 13, 21, 23, 1, 25, 18, 14, 7, 9, 9, 5, 13, 4, 13, 19, 21, 22, 17])
 
 sx = Scrambler([0] * 26)  # some useful blank/minimal ones for testing
 rx = Reflector([0] * 26)
@@ -190,9 +187,9 @@ rt = Reflector([13] * 26)
 px = Plugboard([0] * 26)
 
 possible_scramblers = [si, sii, siii, siv, sv, svi, svii, sviii, sx]
-possible_reflectors = [ra, rb, rc, rbt, rct, rx, rt]
+possible_reflectors = [rb, rc]
 
 
 # stuff needed for enigmaGUIbasic
 main_scrambler_list = [si, sii, siii]
-default_machine = Machine(main_scrambler_list,  ra, px)
+default_machine = Machine(main_scrambler_list,  rb, px)
