@@ -5,9 +5,12 @@ import EnigmaLogic
 
 class MainInterface:
     def __init__(self, parent):
+        settings = ConfigurationWindow()
         self.parent = parent
         parent.title("Enigma Machine Emulator")
         self.initialiseWindow()
+        settings.settingsWindow()
+        settings.window.grab_set()
 
     def initialiseWindow(self):
         settings = ConfigurationWindow()
@@ -53,6 +56,7 @@ class ConfigurationWindow:
     def settingsWindow(self):
         global select_rotor_1, select_rotor_2, select_rotor_3
         self.window = Toplevel(root1)
+        #self.window.grab_set()
         self.window.title("Settings")
 
         settings_frame = ttk.Labelframe(self.window, text="Settings", padding="10 10 10 10")
@@ -113,6 +117,7 @@ class ConfigurationWindow:
         btn_Save.grid(column=1, row=3, padx=5, pady=5)
 
     def saveWindow(self, rotor, rotors2, rotors3, reflectors, entryPlug, sets1, sets2, sets3):
+
         global rotor1, rotor2, rotor3, reflector, plugboard, set1, set2, set3
         rotor1 = rotor
         rotor2 = rotors2
