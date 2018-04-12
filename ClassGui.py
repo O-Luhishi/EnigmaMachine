@@ -1,7 +1,6 @@
 from tkinter import *
 from tkinter import ttk
-import tkinter.messagebox
-import EnigmaLogic
+import MachineLogic
 
 class MainInterface:
     def __init__(self, parent):
@@ -30,7 +29,7 @@ class MainInterface:
 
         #Encryption And Decryption Buttons
         btn_Encrypt = ttk.Button(root1, text="Encrypt Message", command=enc.encrypt)
-        btn_Decrypt = ttk.Button(root1, text="Decrypt Cipher", command=settings.settingsWindow)
+        btn_Decrypt = ttk.Button(root1, text="Decrypt Cipher", command=enc.encrypt)
 
         # Configuration Button To Open settings
         btn_Configuration = ttk.Button(root1, text="Configure Machine", command=settings.settingsWindow)
@@ -56,10 +55,12 @@ class ConfigurationWindow:
     def settingsWindow(self):
         global select_rotor_1, select_rotor_2, select_rotor_3
         self.window = Toplevel(root1)
+        self.window.wm_attributes("-topmost",1)
+        self.window.focus()
         #self.window.grab_set()
-        self.window.title("Settings")
+        self.window.title("Enigma Machine")
 
-        settings_frame = ttk.Labelframe(self.window, text="Settings", padding="10 10 10 10")
+        settings_frame = ttk.Labelframe(self.window, text="Configure Machine", padding="10 10 10 10")
         # dropdowns to select which scrambler to use
         available_rotors = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'none']
         pick = ttk.Labelframe(settings_frame, text='Rotor Configuration', padding="5 5 5 5")
@@ -89,11 +90,11 @@ class ConfigurationWindow:
 
 
         # entry to add plugboard settings
-        plugboard_entry_label = ttk.Labelframe(settings_frame, text="Plugboard Configurations")
+        lbl_plugboard = ttk.Labelframe(settings_frame, text="Plugboard Configurations")
         plugtext = ""
-        plugboard_entry_text = StringVar()
-        plugboard_entry_text.set(plugtext)
-        plugboard_entry = ttk.Entry(plugboard_entry_label, textvariable=plugboard_entry_text)
+        txt_plugboard = StringVar()
+        txt_plugboard.set(plugtext)
+        plugboard_entry = ttk.Entry(lbl_plugboard, textvariable=txt_plugboard)
 
         settings_frame.grid(column=1, row=0, rowspan=3, padx=10, pady=10)
         pick.grid(in_=settings_frame, column=0, row=0, padx=5, pady=5)
@@ -110,8 +111,8 @@ class ConfigurationWindow:
         select_reflector.grid(in_=pick4, padx=5, pady=5, sticky="ew")
         pick4.grid_columnconfigure(0, weight=1)
 
-        plugboard_entry_label.grid(in_=settings_frame, row=3, padx=5, pady=5)
-        plugboard_entry.grid(in_=plugboard_entry_label, padx=5, pady=5)
+        lbl_plugboard.grid(in_=settings_frame, row=3, padx=5, pady=5)
+        plugboard_entry.grid(in_=lbl_plugboard, padx=5, pady=5)
 
         btn_Save = ttk.Button(self.window, text="Save Settings", command= lambda: self.saveWindow(select_rotor_1.current(), select_rotor_2.current(), select_rotor_3.current(), select_reflector.current(), plugboard_entry.get(), set1.get(), set2.get(), set3.get()))
         btn_Save.grid(column=1, row=3, padx=5, pady=5)
@@ -162,34 +163,34 @@ class Encryption:
             if c.isalpha() or c == " ":
                 total += 1
         if total != len(plain):
-            tkinter.messagebox.showerror("oh no!", "Invalid plaintext")
+            tkinter.messagebox.showerror("Error", "Invalid plaintext")
 
         # put the right scramblers and reflector in the machine
         scram_list = [
-            EnigmaLogic.possible_scramblers[settingsPage.getRotor1()],
-            EnigmaLogic.possible_scramblers[settingsPage.getRotor2()],
-            EnigmaLogic.possible_scramblers[settingsPage.getRotor3()]
+            MachineLogic.possible_scramblers[settingsPage.getRotor1()],
+            MachineLogic.possible_scramblers[settingsPage.getRotor2()],
+            MachineLogic.possible_scramblers[settingsPage.getRotor3()]
         ]
-        refl = EnigmaLogic.possible_reflectors[settingsPage.getReflector()]
+        refl = MachineLogic.possible_reflectors[settingsPage.getReflector()]
 
         # make a Plugboard from the entry
         plug = plugboard.build_plugboard(settingsPage.getPlugBoard())
-        if not plug.check_mapping():
-            tkinter.messagebox.showerror("oh no!", "This is not a valid plugboard:\n not mapped in pairs")
+        if not plug.valid_Plugboard():
+            tkinter.messagebox.showerror("Error", "This is not a valid plugboard:\n not mapped in pairs")
 
         # set the starting orientations of the rotors
         orient_list = [settingsPage.getSet1(), settingsPage.getSet2(), settingsPage.getSet3()]
         for i in orient_list:
             if len(i) > 1 or not (i.isalpha() or i == ""):
-                tkinter.messagebox.showerror("oh no!", "Invalid setting for starting position:\n "
+                tkinter.messagebox.showerror("Error", "Invalid setting for starting position:\n "
                                                        "must be a single letter or blank")
             break
         for i in range(len(scram_list)):
             rotor = scram_list[i]
-            rotor.orientation = EnigmaLogic.alphabet.find(orient_list[i])
+            rotor.position = MachineLogic.alphabet.find(orient_list[i])
 
         # define the machine to be used for encryption
-        current_machine = EnigmaLogic.Machine(scram_list, refl, plug)
+        current_machine = MachineLogic.Enigma(scram_list, refl, plug)
 
         # do the encryption
         cipher = current_machine.encrypt(plain)
@@ -199,7 +200,7 @@ class BuildPlugboard:
     def __init__(self):
         pass
     def build_plugboard(self, map_string):
-        length = len(EnigmaLogic.alphabet)
+        length = len(MachineLogic.alphabet)
         new_plug_map = [0] * length
         if len(map_string) != 0:
             pairs = map_string.split()
@@ -207,14 +208,14 @@ class BuildPlugboard:
                 if not (pair[0].isalpha() and pair[2].isalpha() and pair[1] == ":" and len(pair) == 3):
                     tkinter.messagebox.showerror("oh no!", "This is not a valid plugboard:\n invalid entry of settings")
             for pair in pairs:
-                index1 = EnigmaLogic.alphabet.find(pair[0])
-                index2 = EnigmaLogic.alphabet.find(pair[2])
+                index1 = MachineLogic.alphabet.find(pair[0])
+                index2 = MachineLogic.alphabet.find(pair[2])
                 new_plug_map[index1] = (index2 - index1) % length
                 new_plug_map[index2] = (index1 - index2) % length
-            new_plug = EnigmaLogic.Plugboard(new_plug_map)
+            new_plug = MachineLogic.Plugboard(new_plug_map)
             return new_plug
         else:
-            new_plug = EnigmaLogic.Plugboard(new_plug_map)
+            new_plug = MachineLogic.Plugboard(new_plug_map)
             return new_plug
 
 if __name__ == "__main__":
