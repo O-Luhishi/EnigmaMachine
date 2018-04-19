@@ -9,7 +9,6 @@ class MainInterface:
         parent.title("Enigma Machine Emulator")
         self.initialiseWindow()
         settings.settingsWindow()
-        settings.window.grab_set()
 
     def initialiseWindow(self):
         settings = ConfigurationWindow()
@@ -57,7 +56,7 @@ class ConfigurationWindow:
         self.window = Toplevel(root1)
         self.window.wm_attributes("-topmost",1)
         self.window.focus()
-        #self.window.grab_set()
+        self.window.grab_set()
         self.window.title("Enigma Machine")
 
         settings_frame = ttk.Labelframe(self.window, text="Configure Machine", padding="10 10 10 10")
