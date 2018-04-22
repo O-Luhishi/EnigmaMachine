@@ -92,7 +92,7 @@ class Enigma:
         return int
 
     def encrypt(self, text):
-        # Applies encryption algorith on only plain text
+        # Applies encryption algorithm on only plain text
         returnedTxt = ""
         for cipher in text:
             self.increment_Rotors()
